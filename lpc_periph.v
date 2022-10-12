@@ -139,60 +139,60 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
              begin
                  skipCycle <= 1'b0;
                  if (nrst_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
-                 else if ((lframe_i == 1'b0) && (lad_bus == 4'h0)) fsm_next_state <= `LPC_ST_START;
+                 else if ((lframe_i == 1'b0) && (lad_bus == 4'h5)) fsm_next_state <= `LPC_ST_START;
              end
              `LPC_ST_START:
               begin
-                  if ((lframe_i == 1'b0) && (lad_bus == 4'h0)) fsm_next_state <= `LPC_ST_START;
+                  if ((lframe_i == 1'b0) && (lad_bus == 4'h5)) fsm_next_state <= `LPC_ST_START;
                   else if ((lframe_i == 1'b1) && (lad_bus != 4'h0) && (lad_bus != 4'h2)) skipCycle = 1'b1;
-                  else if ((lframe_i == 1'b1) && (lad_bus == 4'h0)) fsm_next_state <= `LPC_ST_CYCTYPE_RD;
-                  else if ((lframe_i == 1'b1) && (lad_bus == 4'h2)) fsm_next_state <= `LPC_ST_CYCTYPE_WR;                
+                  else if ((lframe_i == 1'b1) && (lad_bus == 4'h0)) fsm_next_state <= `LPC_ST_CYCTYPE_TPM_RD;
+                  else if ((lframe_i == 1'b1) && (lad_bus == 4'h2)) fsm_next_state <= `LPC_ST_CYCTYPE_TPM_WR;                
               end
-              `LPC_ST_CYCTYPE_RD:
-               fsm_next_state <= `LPC_ST_ADDR_RD_CLK1;
-              `LPC_ST_ADDR_RD_CLK1:
-               fsm_next_state <= `LPC_ST_ADDR_RD_CLK2;
-              `LPC_ST_ADDR_RD_CLK2:
-               fsm_next_state <= `LPC_ST_ADDR_RD_CLK3;
-              `LPC_ST_ADDR_RD_CLK3:
-               fsm_next_state <= `LPC_ST_ADDR_RD_CLK4;
-              `LPC_ST_ADDR_RD_CLK4:
-               fsm_next_state <= `LPC_ST_TAR_RD_CLK1;
-              `LPC_ST_TAR_RD_CLK1:
-               fsm_next_state <= `LPC_ST_TAR_RD_CLK2;
-              `LPC_ST_TAR_RD_CLK2:
+              `LPC_ST_CYCTYPE_TPM_RD:
+               fsm_next_state <= `LPC_ST_ADDR_TPM_RD_CLK1;
+              `LPC_ST_ADDR_TPM_RD_CLK1:
+               fsm_next_state <= `LPC_ST_ADDR_TPM_RD_CLK2;
+              `LPC_ST_ADDR_TPM_RD_CLK2:
+               fsm_next_state <= `LPC_ST_ADDR_TPM_RD_CLK3;
+              `LPC_ST_ADDR_TPM_RD_CLK3:
+               fsm_next_state <= `LPC_ST_ADDR_TPM_RD_CLK4;
+              `LPC_ST_ADDR_TPM_RD_CLK4:
+               fsm_next_state <= `LPC_ST_TAR_TPM_RD_CLK1;
+              `LPC_ST_TAR_TPM_RD_CLK1:
+               fsm_next_state <= `LPC_ST_TAR_TPM_RD_CLK2;
+              `LPC_ST_TAR_TPM_RD_CLK2:
                begin
                    if (addr_hit_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
-                   if (addr_hit_i == 1'b1) fsm_next_state <= `LPC_ST_SYNC_RD;
+                   if (addr_hit_i == 1'b1) fsm_next_state <= `LPC_ST_SYNC_TPM_RD;
                end
-              `LPC_ST_SYNC_RD:
-               fsm_next_state <= `LPC_ST_DATA_RD_CLK1;
-              `LPC_ST_DATA_RD_CLK1:
-               fsm_next_state <= `LPC_ST_DATA_RD_CLK2;
-              `LPC_ST_DATA_RD_CLK2:
+              `LPC_ST_SYNC_TPM_RD:
+               fsm_next_state <= `LPC_ST_DATA_TPM_RD_CLK1;
+              `LPC_ST_DATA_TPM_RD_CLK1:
+               fsm_next_state <= `LPC_ST_DATA_TPM_RD_CLK2;
+              `LPC_ST_DATA_TPM_RD_CLK2:
                fsm_next_state <= `LPC_ST_FINAL_TAR_CLK1;
-              `LPC_ST_CYCTYPE_WR:
-               fsm_next_state <= `LPC_ST_ADDR_WR_CLK1;
-              `LPC_ST_ADDR_WR_CLK1:
-               fsm_next_state <= `LPC_ST_ADDR_WR_CLK2;
-              `LPC_ST_ADDR_WR_CLK2:
-               fsm_next_state <= `LPC_ST_ADDR_WR_CLK3;
-              `LPC_ST_ADDR_WR_CLK3:
-               fsm_next_state <= `LPC_ST_ADDR_WR_CLK4;
-              `LPC_ST_ADDR_WR_CLK4:
-               fsm_next_state <= `LPC_ST_DATA_WR_CLK1;
-              `LPC_ST_DATA_WR_CLK1:
-               fsm_next_state <= `LPC_ST_DATA_WR_CLK2;
-              `LPC_ST_DATA_WR_CLK2:
-               fsm_next_state <= `LPC_ST_TAR_WR_CLK1;
-              `LPC_ST_TAR_WR_CLK1:
-               fsm_next_state <= `LPC_ST_TAR_WR_CLK2;
-              `LPC_ST_TAR_WR_CLK2:
+              `LPC_ST_CYCTYPE_TPM_WR:
+               fsm_next_state <= `LPC_ST_ADDR_TPM_WR_CLK1;
+              `LPC_ST_ADDR_TPM_WR_CLK1:
+               fsm_next_state <= `LPC_ST_ADDR_TPM_WR_CLK2;
+              `LPC_ST_ADDR_TPM_WR_CLK2:
+               fsm_next_state <= `LPC_ST_ADDR_TPM_WR_CLK3;
+              `LPC_ST_ADDR_TPM_WR_CLK3:
+               fsm_next_state <= `LPC_ST_ADDR_TPM_WR_CLK4;
+              `LPC_ST_ADDR_TPM_WR_CLK4:
+               fsm_next_state <= `LPC_ST_DATA_TPM_WR_CLK1;
+              `LPC_ST_DATA_TPM_WR_CLK1:
+               fsm_next_state <= `LPC_ST_DATA_TPM_WR_CLK2;
+              `LPC_ST_DATA_TPM_WR_CLK2:
+               fsm_next_state <= `LPC_ST_TAR_TPM_WR_CLK1;
+              `LPC_ST_TAR_TPM_WR_CLK1:
+               fsm_next_state <= `LPC_ST_TAR_TPM_WR_CLK2;
+              `LPC_ST_TAR_TPM_WR_CLK2:
                begin
                    if (addr_hit_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
-                   if (addr_hit_i == 1'b1) fsm_next_state <= `LPC_ST_SYNC_WR;
+                   if (addr_hit_i == 1'b1) fsm_next_state <= `LPC_ST_SYNC_TPM_WR;
                end
-              `LPC_ST_SYNC_WR:
+              `LPC_ST_SYNC_TPM_WR:
                fsm_next_state <= `LPC_ST_FINAL_TAR_CLK1;
               `LPC_ST_FINAL_TAR_CLK1:
                fsm_next_state <= `LPC_ST_FINAL_TAR_CLK2;
@@ -205,8 +205,8 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
         endcase
     end
 
-    assign rd_data_en = (fsm_next_state == `LPC_ST_DATA_RD_CLK1) ? 2'b01 :
-                        (fsm_next_state == `LPC_ST_DATA_RD_CLK2) ? 2'b10 :
+    assign rd_data_en = (fsm_next_state == `LPC_ST_DATA_TPM_RD_CLK1) ? 2'b01 :
+                        (fsm_next_state == `LPC_ST_DATA_TPM_RD_CLK2) ? 2'b10 :
                         2'b00;
 
     assign lpc_data_out_o = (sync_en == 1'b1) ? 4'h0 :
@@ -216,12 +216,12 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
                             (rd_data_en[1] == 1'b1) ? din_i[7:4] :
                             4'h0;
 
-    assign lad_bus = (current_state_o == `LPC_ST_SYNC_WR) ? 4'b0000 : 4'bzzzz;
+    assign lad_bus = (current_state_o == `LPC_ST_SYNC_TPM_WR) ? 4'b0000 : 4'bzzzz;
     assign lad_bus = (rd_data_en[0]) ? lpc_data_out_o: 4'bzzzz;
     assign lad_bus = (rd_data_en[1]) ? lpc_data_out_o: 4'bzzzz;
 
-    assign io_wren_sm_o = (fsm_next_state == `LPC_ST_TAR_WR_CLK1) ? 1'b1 :
-                          (fsm_next_state == `LPC_ST_TAR_WR_CLK2) ? 1'b1 :
+    assign io_wren_sm_o = (fsm_next_state == `LPC_ST_TAR_TPM_WR_CLK1) ? 1'b1 :
+                          (fsm_next_state == `LPC_ST_TAR_TPM_WR_CLK2) ? 1'b1 :
                           1'b0;
 
     always @ (posedge clk_i) begin
@@ -239,27 +239,27 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
     always @(*) begin
         tar_F <= 1'b0;
         case(fsm_next_state)
-            `LPC_ST_SYNC_RD:
+            `LPC_ST_SYNC_TPM_RD:
              sync_en <= 1'b1;
-            `LPC_ST_SYNC_WR:
+            `LPC_ST_SYNC_TPM_WR:
              sync_en <= 1'b1;
             `LPC_ST_FINAL_TAR_CLK1:
              tar_F <= 1'b1;
-            `LPC_ST_ADDR_RD_CLK1:
+            `LPC_ST_ADDR_TPM_RD_CLK1:
              rd_addr_en <= 4'b1000;
-            `LPC_ST_ADDR_RD_CLK2:
+            `LPC_ST_ADDR_TPM_RD_CLK2:
              rd_addr_en <= 4'b0100;
-            `LPC_ST_ADDR_RD_CLK3:
+            `LPC_ST_ADDR_TPM_RD_CLK3:
              rd_addr_en <= 4'b0010;
-            `LPC_ST_ADDR_RD_CLK4:
+            `LPC_ST_ADDR_TPM_RD_CLK4:
              rd_addr_en <= 4'b0001;
-            `LPC_ST_ADDR_WR_CLK1:
+            `LPC_ST_ADDR_TPM_WR_CLK1:
              rd_addr_en <= 4'b1000;
-            `LPC_ST_ADDR_WR_CLK2:
+            `LPC_ST_ADDR_TPM_WR_CLK2:
              rd_addr_en <= 4'b0100;
-            `LPC_ST_ADDR_WR_CLK3:
+            `LPC_ST_ADDR_TPM_WR_CLK3:
              rd_addr_en <= 4'b0010;
-            `LPC_ST_ADDR_WR_CLK4:
+            `LPC_ST_ADDR_TPM_WR_CLK4:
              rd_addr_en <= 4'b0001;
             default:
             begin
@@ -270,12 +270,12 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
         endcase
     end
 
-    assign io_rden_sm_o = (fsm_next_state == `LPC_ST_TAR_RD_CLK1) ? 1'b1 :
-                          (fsm_next_state == `LPC_ST_TAR_RD_CLK2) ? 1'b1 :
+    assign io_rden_sm_o = (fsm_next_state == `LPC_ST_TAR_TPM_RD_CLK1) ? 1'b1 :
+                          (fsm_next_state == `LPC_ST_TAR_TPM_RD_CLK2) ? 1'b1 :
                           1'b0;
 
-    assign wr_data_en = (fsm_next_state == `LPC_ST_DATA_WR_CLK1) ? 2'b01 :
-                        (fsm_next_state == `LPC_ST_DATA_WR_CLK2) ? 2'b10 :
+    assign wr_data_en = (fsm_next_state == `LPC_ST_DATA_TPM_WR_CLK1) ? 2'b01 :
+                        (fsm_next_state == `LPC_ST_DATA_TPM_WR_CLK2) ? 2'b10 :
                         2'b00;
 
 
