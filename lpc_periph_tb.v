@@ -23,7 +23,7 @@
 // You should have received a copy of the GNU Lesser General
 // Public License along with this source; if not, download it
 // from http://www.opencores.org/lgpl.shtml
-
+`timescale 1 ns / 1 ps
 
 module lpc_periph_tb();
 
