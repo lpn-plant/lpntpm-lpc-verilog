@@ -63,10 +63,10 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
     reg  [15:0] lpc_addr_o_reg;   //16-bit internal LPC address register
 
     reg   [4:0] fsm_next_state;   //State: next state of FSM
-    reg   [4:0] previous_state;   //State: previous state of FSM
+    reg   [4:0] previous_state;
 
     reg   [1:0] cycle_type = 2'b00; //"00" none, "01" write, "11" read
-    integer cycle_cnt = 0;          //auxiliary clock periods counter
+    integer     cycle_cnt = 0;          //auxiliary clock periods counter
     reg  [31:0] dinAbuf = 32'b00000000000000000000000000000000; //32-bit register buffer for LPC cycle data (encoded)
 
     reg  [31:0] memoryLPC [0:2]; //memory array 2x32bit
@@ -90,23 +90,23 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
 
     always @ (posedge clk_i) begin  //saving LPC protocol data 2 out databus
         if (lframe_i==1'b0) begin
-            wasLframeLow = 1'b1;
-            cycle_cnt = 0;
-            wasLpc_enHigh = 1'b0;
+            wasLframeLow <= 1'b1;
+            cycle_cnt <= 0;
+            wasLpc_enHigh <= 1'b0;
         end
             if ((lpc_en_o) && (wasLframeLow)) begin
-                wasLpc_enHigh = 1'b1;
+                wasLpc_enHigh <= 1'b1;
             end
             if (wasLpc_enHigh) begin
-                cycle_cnt = cycle_cnt + 1;
+                cycle_cnt <= cycle_cnt + 1;
                 if ((cycle_cnt > 1) && (cycle_cnt < 3)) begin
                     dinAbuf[31:28] <= 4'b0000;
                     dinAbuf[27:12] <= lpc_addr_o_reg;
                     dinAbuf[11:4] <= lpc_data_in_o;
                     dinAbuf[3:2] <= 2'b00;
                     dinAbuf[1:0] <= cycle_type;
-                    if (dinAbuf==memoryLPC[0]) newValuedata = 1'b0;
-                    else newValuedata = 1'b1;
+                    if (dinAbuf==memoryLPC[0]) newValuedata <= 1'b0;
+                    else newValuedata <= 1'b1;
                     TDATA <= dinAbuf;
                     memoryLPC[0] <= dinAbuf;
                 end
@@ -116,9 +116,9 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
                 end
                 else if  (cycle_cnt >= 5) begin
                     READY <= 1'b0;
-                    wasLpc_enHigh = 1'b0;
-                    wasLframeLow = 1'b0;
-                    cycle_cnt = 0;
+                    wasLpc_enHigh <= 1'b0;
+                    wasLframeLow <= 1'b0;
+                    cycle_cnt <= 0;
             end
         end
     end
@@ -132,75 +132,75 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
     end
 
     always @(*) begin
-        if (nrst_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
-        if (lframe_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
+        if (nrst_i == 1'b0) fsm_next_state = `LPC_ST_IDLE;
+        if (lframe_i == 1'b0) fsm_next_state = `LPC_ST_IDLE;
         case(current_state_o)
             `LPC_ST_IDLE:
              begin
-                 skipCycle <= 1'b0;
-                 if (nrst_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
-                 else if ((lframe_i == 1'b0) && (lad_bus == `LPC_START)) fsm_next_state <= `LPC_ST_START;
+                 skipCycle = 1'b0;
+                 if (nrst_i == 1'b0) fsm_next_state = `LPC_ST_IDLE;
+                 else if ((lframe_i == 1'b0) && (lad_bus == `LPC_START)) fsm_next_state = `LPC_ST_START;
              end
              `LPC_ST_START:
               begin
-                  if ((lframe_i == 1'b0) && (lad_bus == `LPC_START)) fsm_next_state <= `LPC_ST_START;
+                  if ((lframe_i == 1'b0) && (lad_bus == `LPC_START)) fsm_next_state = `LPC_ST_START;
                   else if ((lframe_i == 1'b1) && (lad_bus != 4'h0) && (lad_bus != 4'h2)) skipCycle = 1'b1;
-                  else if ((lframe_i == 1'b1) && (lad_bus == 4'h0)) fsm_next_state <= `LPC_ST_CYCTYPE_RD;
-                  else if ((lframe_i == 1'b1) && (lad_bus == 4'h2)) fsm_next_state <= `LPC_ST_CYCTYPE_WR;                
+                  else if ((lframe_i == 1'b1) && (lad_bus == 4'h0)) fsm_next_state = `LPC_ST_CYCTYPE_RD;
+                  else if ((lframe_i == 1'b1) && (lad_bus == 4'h2)) fsm_next_state = `LPC_ST_CYCTYPE_WR;                
               end
               `LPC_ST_CYCTYPE_RD:
-               fsm_next_state <= `LPC_ST_ADDR_RD_CLK1;
+               fsm_next_state = `LPC_ST_ADDR_RD_CLK1;
               `LPC_ST_ADDR_RD_CLK1:
-               fsm_next_state <= `LPC_ST_ADDR_RD_CLK2;
+               fsm_next_state = `LPC_ST_ADDR_RD_CLK2;
               `LPC_ST_ADDR_RD_CLK2:
-               fsm_next_state <= `LPC_ST_ADDR_RD_CLK3;
+               fsm_next_state = `LPC_ST_ADDR_RD_CLK3;
               `LPC_ST_ADDR_RD_CLK3:
-               fsm_next_state <= `LPC_ST_ADDR_RD_CLK4;
+               fsm_next_state = `LPC_ST_ADDR_RD_CLK4;
               `LPC_ST_ADDR_RD_CLK4:
-               fsm_next_state <= `LPC_ST_TAR_RD_CLK1;
+               fsm_next_state = `LPC_ST_TAR_RD_CLK1;
               `LPC_ST_TAR_RD_CLK1:
-               fsm_next_state <= `LPC_ST_TAR_RD_CLK2;
+               fsm_next_state = `LPC_ST_TAR_RD_CLK2;
               `LPC_ST_TAR_RD_CLK2:
                begin
-                   if (addr_hit_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
-                   if (addr_hit_i == 1'b1) fsm_next_state <= `LPC_ST_SYNC_RD;
+                   if (addr_hit_i == 1'b0) fsm_next_state = `LPC_ST_IDLE;
+                   if (addr_hit_i == 1'b1) fsm_next_state = `LPC_ST_SYNC_RD;
                end
               `LPC_ST_SYNC_RD:
-               fsm_next_state <= `LPC_ST_DATA_RD_CLK1;
+               fsm_next_state = `LPC_ST_DATA_RD_CLK1;
               `LPC_ST_DATA_RD_CLK1:
-               fsm_next_state <= `LPC_ST_DATA_RD_CLK2;
+               fsm_next_state = `LPC_ST_DATA_RD_CLK2;
               `LPC_ST_DATA_RD_CLK2:
-               fsm_next_state <= `LPC_ST_FINAL_TAR_CLK1;
+               fsm_next_state = `LPC_ST_FINAL_TAR_CLK1;
               `LPC_ST_CYCTYPE_WR:
-               fsm_next_state <= `LPC_ST_ADDR_WR_CLK1;
+               fsm_next_state = `LPC_ST_ADDR_WR_CLK1;
               `LPC_ST_ADDR_WR_CLK1:
-               fsm_next_state <= `LPC_ST_ADDR_WR_CLK2;
+               fsm_next_state = `LPC_ST_ADDR_WR_CLK2;
               `LPC_ST_ADDR_WR_CLK2:
-               fsm_next_state <= `LPC_ST_ADDR_WR_CLK3;
+               fsm_next_state = `LPC_ST_ADDR_WR_CLK3;
               `LPC_ST_ADDR_WR_CLK3:
-               fsm_next_state <= `LPC_ST_ADDR_WR_CLK4;
+               fsm_next_state = `LPC_ST_ADDR_WR_CLK4;
               `LPC_ST_ADDR_WR_CLK4:
-               fsm_next_state <= `LPC_ST_DATA_WR_CLK1;
+               fsm_next_state = `LPC_ST_DATA_WR_CLK1;
               `LPC_ST_DATA_WR_CLK1:
-               fsm_next_state <= `LPC_ST_DATA_WR_CLK2;
+               fsm_next_state = `LPC_ST_DATA_WR_CLK2;
               `LPC_ST_DATA_WR_CLK2:
-               fsm_next_state <= `LPC_ST_TAR_WR_CLK1;
+               fsm_next_state = `LPC_ST_TAR_WR_CLK1;
               `LPC_ST_TAR_WR_CLK1:
-               fsm_next_state <= `LPC_ST_TAR_WR_CLK2;
+               fsm_next_state = `LPC_ST_TAR_WR_CLK2;
               `LPC_ST_TAR_WR_CLK2:
                begin
-                   if (addr_hit_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
-                   if (addr_hit_i == 1'b1) fsm_next_state <= `LPC_ST_SYNC_WR;
+                   if (addr_hit_i == 1'b0) fsm_next_state = `LPC_ST_IDLE;
+                   if (addr_hit_i == 1'b1) fsm_next_state = `LPC_ST_SYNC_WR;
                end
               `LPC_ST_SYNC_WR:
-               fsm_next_state <= `LPC_ST_FINAL_TAR_CLK1;
+               fsm_next_state = `LPC_ST_FINAL_TAR_CLK1;
               `LPC_ST_FINAL_TAR_CLK1:
-               fsm_next_state <= `LPC_ST_FINAL_TAR_CLK2;
+               fsm_next_state = `LPC_ST_FINAL_TAR_CLK2;
               default:
               begin
-                  if (nrst_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
-                  if (lframe_i == 1'b0) fsm_next_state <= `LPC_ST_IDLE;
-                  fsm_next_state <= `LPC_ST_IDLE;
+                  if (nrst_i == 1'b0) fsm_next_state = `LPC_ST_IDLE;
+                  if (lframe_i == 1'b0) fsm_next_state = `LPC_ST_IDLE;
+                  fsm_next_state = `LPC_ST_IDLE;
               end
         endcase
     end
@@ -237,35 +237,35 @@ module lpc_periph (clk_i, nrst_i, lframe_i, lad_bus, addr_hit_i, current_state_o
                       1'h0;
 
     always @(*) begin
-        tar_F <= 1'b0;
+        tar_F = 1'b0;
         case(fsm_next_state)
             `LPC_ST_SYNC_RD:
-             sync_en <= 1'b1;
+             sync_en = 1'b1;
             `LPC_ST_SYNC_WR:
-             sync_en <= 1'b1;
+             sync_en = 1'b1;
             `LPC_ST_FINAL_TAR_CLK1:
-             tar_F <= 1'b1;
+             tar_F = 1'b1;
             `LPC_ST_ADDR_RD_CLK1:
-             rd_addr_en <= 4'b1000;
+             rd_addr_en = 4'b1000;
             `LPC_ST_ADDR_RD_CLK2:
-             rd_addr_en <= 4'b0100;
+             rd_addr_en = 4'b0100;
             `LPC_ST_ADDR_RD_CLK3:
-             rd_addr_en <= 4'b0010;
+             rd_addr_en = 4'b0010;
             `LPC_ST_ADDR_RD_CLK4:
-             rd_addr_en <= 4'b0001;
+             rd_addr_en = 4'b0001;
             `LPC_ST_ADDR_WR_CLK1:
-             rd_addr_en <= 4'b1000;
+             rd_addr_en = 4'b1000;
             `LPC_ST_ADDR_WR_CLK2:
-             rd_addr_en <= 4'b0100;
+             rd_addr_en = 4'b0100;
             `LPC_ST_ADDR_WR_CLK3:
-             rd_addr_en <= 4'b0010;
+             rd_addr_en = 4'b0010;
             `LPC_ST_ADDR_WR_CLK4:
-             rd_addr_en <= 4'b0001;
+             rd_addr_en = 4'b0001;
             default:
             begin
-                rd_addr_en <= 4'b0000;
-                tar_F <= 1'b0;
-                sync_en <= 1'b0;
+                rd_addr_en = 4'b0000;
+                tar_F = 1'b0;
+                sync_en = 1'b0;
             end
         endcase
     end
