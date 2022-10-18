@@ -105,57 +105,57 @@ module lpc_host (clk_i, ctrl_addr_i, ctrl_data_i, ctrl_nrst_i, ctrl_lframe_i,
                 if (ctrl_lframe_i & ctrl_rd_status_i) begin
                     LPC_LFRAME  = 1;
                     lad_out = 4'b0000;
-                    fsm_host_state = `LPC_ST_CYCTYPE_TPM_RD;
+                    fsm_host_state = `LPC_ST_CYCTYPE_RD;
                 end
                 else if (ctrl_lframe_i & ctrl_wr_status_i) begin
                     LPC_LFRAME  = 1;
                     lad_out = 4'b0010;
-                    fsm_host_state = `LPC_ST_CYCTYPE_TPM_WR;
+                    fsm_host_state = `LPC_ST_CYCTYPE_WR;
                 end
            end  if (ctrl_memory_cycle_i) begin
                 if (ctrl_lframe_i & ctrl_rd_status_i) begin
                     LPC_LFRAME  = 1;
                     lad_out = 4'b0100;
-                    fsm_host_state = `LPC_ST_CYCTYPE_MEMORY_TPM_RD;
+                    fsm_host_state = `LPC_ST_CYCTYPE_MEMORY_RD;
                 end
                 else if (ctrl_lframe_i & ctrl_wr_status_i) begin
                     LPC_LFRAME  = 1;
                     lad_out = 4'b0110;
-                    fsm_host_state = `LPC_ST_CYCTYPE_MEMORY_TPM_WR;
+                    fsm_host_state = `LPC_ST_CYCTYPE_MEMORY_WR;
                 end
            end
         end
-        else if ((fsm_host_state == `LPC_ST_CYCTYPE_TPM_RD) || (fsm_host_state == `LPC_ST_CYCTYPE_MEMORY_TPM_RD)) begin
+        else if ((fsm_host_state == `LPC_ST_CYCTYPE_RD) || (fsm_host_state == `LPC_ST_CYCTYPE_MEMORY_RD)) begin
             lad_out = ctrl_addr_i[15:12];
-            fsm_host_state = `LPC_ST_ADDR_TPM_RD_CLK1;
+            fsm_host_state = `LPC_ST_ADDR_RD_CLK1;
         end
-        else if (fsm_host_state == `LPC_ST_ADDR_TPM_RD_CLK1) begin
+        else if (fsm_host_state == `LPC_ST_ADDR_RD_CLK1) begin
             lad_out    = ctrl_addr_i[11: 8];
-            fsm_host_state = `LPC_ST_ADDR_TPM_RD_CLK2;
+            fsm_host_state = `LPC_ST_ADDR_RD_CLK2;
         end
-        else if (fsm_host_state == `LPC_ST_ADDR_TPM_RD_CLK2) begin
+        else if (fsm_host_state == `LPC_ST_ADDR_RD_CLK2) begin
            lad_out    = ctrl_addr_i[ 7: 4];
-           fsm_host_state = `LPC_ST_ADDR_TPM_RD_CLK3;
+           fsm_host_state = `LPC_ST_ADDR_RD_CLK3;
         end
-        else if (fsm_host_state == `LPC_ST_ADDR_TPM_RD_CLK3) begin
+        else if (fsm_host_state == `LPC_ST_ADDR_RD_CLK3) begin
             lad_out    = ctrl_addr_i[ 3: 0];
-            fsm_host_state = `LPC_ST_ADDR_TPM_RD_CLK4;
+            fsm_host_state = `LPC_ST_ADDR_RD_CLK4;
         end
-        else if (fsm_host_state == `LPC_ST_ADDR_TPM_RD_CLK4) begin
+        else if (fsm_host_state == `LPC_ST_ADDR_RD_CLK4) begin
             lad_out    = 4'b1111;
-            fsm_host_state = `LPC_ST_TAR_TPM_RD_CLK1;
+            fsm_host_state = `LPC_ST_TAR_RD_CLK1;
         end
-        else if (fsm_host_state == `LPC_ST_TAR_TPM_RD_CLK1) begin
+        else if (fsm_host_state == `LPC_ST_TAR_RD_CLK1) begin
             lad_en     = 0;
-            fsm_host_state = `LPC_ST_TAR_TPM_RD_CLK2;
+            fsm_host_state = `LPC_ST_TAR_RD_CLK2;
         end
-        else if (fsm_host_state == `LPC_ST_TAR_TPM_RD_CLK2) begin
-            fsm_host_state = `LPC_ST_SYNC_TPM_RD;
+        else if (fsm_host_state == `LPC_ST_TAR_RD_CLK2) begin
+            fsm_host_state = `LPC_ST_SYNC_RD;
         end
-        else if (fsm_host_state == `LPC_ST_SYNC_TPM_RD) begin
+        else if (fsm_host_state == `LPC_ST_SYNC_RD) begin
             ctrl_data_o[3:0] = LPC_LAD;
-            fsm_host_state    = `LPC_ST_DATA_TPM_RD_CLK1;
-            if (lad_reg == 4'b0000) fsm_host_state = `LPC_ST_DATA_TPM_RD_CLK1;
+            fsm_host_state    = `LPC_ST_DATA_RD_CLK1;
+            if (lad_reg == 4'b0000) fsm_host_state = `LPC_ST_DATA_RD_CLK1;
             else if ((lad_reg != 4'b0101) && (lad_reg != 4'b0110)) begin
                 LPC_LRESET = 0;
                 LPC_LFRAME = 1;
@@ -165,49 +165,49 @@ module lpc_host (clk_i, ctrl_addr_i, ctrl_data_i, ctrl_nrst_i, ctrl_lframe_i,
                 fsm_host_state = `LPC_ST_FORCE_RESET;
             end
         end
-        else if (fsm_host_state == `LPC_ST_DATA_TPM_RD_CLK1) begin
+        else if (fsm_host_state == `LPC_ST_DATA_RD_CLK1) begin
             ctrl_data_o[7:4] = LPC_LAD;
-            fsm_host_state = `LPC_ST_DATA_TPM_RD_CLK2;
+            fsm_host_state = `LPC_ST_DATA_RD_CLK2;
         end
-        else if (fsm_host_state == `LPC_ST_DATA_TPM_RD_CLK2) begin
+        else if (fsm_host_state == `LPC_ST_DATA_RD_CLK2) begin
             fsm_host_state = `LPC_ST_FINAL_TAR_CLK1;
         end
-        else if ((fsm_host_state == `LPC_ST_CYCTYPE_TPM_WR) || (fsm_host_state == `LPC_ST_CYCTYPE_MEMORY_TPM_WR)) begin
+        else if ((fsm_host_state == `LPC_ST_CYCTYPE_WR) || (fsm_host_state == `LPC_ST_CYCTYPE_MEMORY_WR)) begin
             lad_out = ctrl_addr_i[15:12];
-            fsm_host_state = `LPC_ST_ADDR_TPM_WR_CLK1;
+            fsm_host_state = `LPC_ST_ADDR_WR_CLK1;
         end
-        else if (fsm_host_state ==  `LPC_ST_ADDR_TPM_WR_CLK1) begin
+        else if (fsm_host_state ==  `LPC_ST_ADDR_WR_CLK1) begin
             lad_out = ctrl_addr_i[11: 8];
-            fsm_host_state = `LPC_ST_ADDR_TPM_WR_CLK2;
+            fsm_host_state = `LPC_ST_ADDR_WR_CLK2;
         end
-        else if (fsm_host_state == `LPC_ST_ADDR_TPM_WR_CLK2) begin
+        else if (fsm_host_state == `LPC_ST_ADDR_WR_CLK2) begin
             lad_out = ctrl_addr_i[ 7: 4];
-            fsm_host_state = `LPC_ST_ADDR_TPM_WR_CLK3;
+            fsm_host_state = `LPC_ST_ADDR_WR_CLK3;
         end
-        else if (fsm_host_state == `LPC_ST_ADDR_TPM_WR_CLK3) begin
+        else if (fsm_host_state == `LPC_ST_ADDR_WR_CLK3) begin
            lad_out = ctrl_addr_i[ 3: 0];
-           fsm_host_state = `LPC_ST_ADDR_TPM_WR_CLK4;
+           fsm_host_state = `LPC_ST_ADDR_WR_CLK4;
         end
-        else if (fsm_host_state == `LPC_ST_ADDR_TPM_WR_CLK4) begin
+        else if (fsm_host_state == `LPC_ST_ADDR_WR_CLK4) begin
             lad_out = ctrl_data_i[3:0];
-            fsm_host_state = `LPC_ST_DATA_TPM_WR_CLK1;
+            fsm_host_state = `LPC_ST_DATA_WR_CLK1;
         end
-        else if (fsm_host_state == `LPC_ST_DATA_TPM_WR_CLK1) begin
+        else if (fsm_host_state == `LPC_ST_DATA_WR_CLK1) begin
             lad_out = ctrl_data_i[7:4];
-            fsm_host_state = `LPC_ST_DATA_TPM_WR_CLK2;
+            fsm_host_state = `LPC_ST_DATA_WR_CLK2;
         end
-        else if (fsm_host_state == `LPC_ST_DATA_TPM_WR_CLK2) begin
+        else if (fsm_host_state == `LPC_ST_DATA_WR_CLK2) begin
             lad_out = 4'b1111;
-            fsm_host_state = `LPC_ST_TAR_TPM_WR_CLK1;
+            fsm_host_state = `LPC_ST_TAR_WR_CLK1;
         end
-        else if (fsm_host_state == `LPC_ST_TAR_TPM_WR_CLK1) begin
+        else if (fsm_host_state == `LPC_ST_TAR_WR_CLK1) begin
             lad_en = 0;
-            fsm_host_state = `LPC_ST_TAR_TPM_WR_CLK2;
+            fsm_host_state = `LPC_ST_TAR_WR_CLK2;
         end
-        else if (fsm_host_state == `LPC_ST_TAR_TPM_WR_CLK2) begin
-            fsm_host_state = `LPC_ST_SYNC_TPM_WR;
+        else if (fsm_host_state == `LPC_ST_TAR_WR_CLK2) begin
+            fsm_host_state = `LPC_ST_SYNC_WR;
         end
-        else if (fsm_host_state == `LPC_ST_SYNC_TPM_WR) begin
+        else if (fsm_host_state == `LPC_ST_SYNC_WR) begin
             if (lad_reg == 4'b0000) fsm_host_state = `LPC_ST_FINAL_TAR_CLK1;
             else if ((lad_reg != 4'b0101) && (lad_reg != 4'b0110)) begin
                 LPC_LRESET = 0;
