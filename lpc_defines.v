@@ -63,6 +63,7 @@
 `define LPC_ST_FINAL_TAR_CLK2   5'h18   // LPC Turnaround (final, 2nd cycle)
 `define LPC_ST_CYCTYPE_MEMORY_RD   5'h19  //LPC Memory Read (new)
 `define LPC_ST_CYCTYPE_MEMORY_WR   5'h1A  //LPC Memory Write (new)
+`define LPC_ST_CYCTYPE           5'h1B 
 
 `define WB_SEL_BYTE     4'b0001             // Byte Transfer
 `define WB_SEL_SHORT    4'b0011             // Short Transfer
